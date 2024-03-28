@@ -17,6 +17,7 @@
 #include <sockhand.h>
 #include <forte_config.h>
 #include "comlayer.h"
+#include "ipPacketBuffer.h"
 
 
 namespace forte {
@@ -49,6 +50,7 @@ namespace forte {
         EComResponse mInterruptResp;
         char mRecvBuffer[cgIPLayerRecvBufferSize];
         unsigned int mBufFillSize;
+        forte::com_infra::CIPComPacketBuffer mPacketBuffer;
     };
 
   }

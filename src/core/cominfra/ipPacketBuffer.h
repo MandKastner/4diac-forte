@@ -17,6 +17,7 @@
 #include <datatype.h>  //needed for size_t?
 #include <queue>
 #include <cstring>
+#include <forte_config.h>
 
 namespace forte{
     namespace com_infra {
@@ -37,7 +38,7 @@ namespace forte{
 
 
         private:
-            const size_t cm_packetBufferQueueSize = 20;
+            const unsigned int cm_packetBufferQueueSize = cgIpPacketBufferQueueSize;
             std::queue<CComPacket> mPacketQueue;
 
         public:

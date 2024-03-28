@@ -280,6 +280,9 @@ mark_as_advanced(FORTE_EventChainExternalEventListSize)
 SET(FORTE_CommunicationInterruptQueueSize "10" CACHE STRING "FORTE Communication interrupt queue size")
 mark_as_advanced(FORTE_CommunicationInterruptQueueSize)
 
+SET(FORTE_IpPacketBufferQueueSize "16" CACHE STRING "FORTE Size of packet buffer queue")
+mark_as_advanced(FORTE_IpPacketBufferQueueSize)
+
 if(FORTE_DYNAMIC_TYPE_LOAD)
 SET(FORTE_IPLayerRecvBufferSize "20000" CACHE STRING "FORTE IP layer recv buffer size")
 else()
