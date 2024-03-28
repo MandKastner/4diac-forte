@@ -21,6 +21,7 @@ forte_add_include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 forte_add_sourcefile_h(comtypes.h comlayersmanager.h)
 forte_add_sourcefile_hcpp(basecommfb commfb comlayer)
+forte_add_sourcefile_hcpp(simpleIpPacketBuffer)
 
 # Will be created in top-level-cmake-file
 forte_add_sourcefile_with_path_cpp(${CMAKE_BINARY_DIR}/core/cominfra/comlayersmanager.cpp) # created file
@@ -30,3 +31,4 @@ forte_add_network_layer(FBDK ON "fbdk" CFBDKASN1ComLayer fbdkasn1layer "Enable F
 forte_add_network_layer(LOCAL ON "loc" CLocalComLayer localcomlayer "Enable Forte local communication")
 forte_add_network_layer(RAW ON "raw" CRawDataComLayer rawdatacomlayer "Enable Forte raw communication")
 forte_add_network_layer(STRUCT_MEMBER OFF "structmemb" CStructMemberLocalComLayer structmembercomlayer "Local communication layer writing to a single element in a struct")
+forte_add_network_layer(MULTICLIENT ON "multiclient" CMultiClientComLayer multiclientcomlayer "Allows multiple clients to connect to a single server instance")

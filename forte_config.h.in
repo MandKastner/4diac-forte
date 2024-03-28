@@ -32,6 +32,10 @@ const unsigned int cgEventChainEventListSize = ${FORTE_EventChainEventListSize};
  */
 const unsigned int cgEventChainExternalEventListSize = ${FORTE_EventChainExternalEventListSize};
 
+/*! Define the initial size of the packet buffer queue.
+ */
+const unsigned int cgIpPacketBufferQueueSize = ${FORTE_IpPacketBufferQueueSize};
+
 
 /*! Defines the number of pending communication messages can be handled by a communication function block
  *

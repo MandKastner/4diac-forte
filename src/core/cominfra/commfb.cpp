@@ -28,6 +28,7 @@
 #include "comlayer.h"
 #include "comlayersmanager.h"
 #include "criticalregion.h"
+#include <queue>
 
 using namespace forte::com_infra;
 
@@ -57,7 +58,6 @@ EMGMResponse CCommFB::changeExecutionState(EMGMCommandType paCommand) {
 
 void CCommFB::executeEvent(TEventID paEIID, CEventChainExecutionThread *const paECET) {
   EComResponse resp = e_Nothing;
-
   switch (paEIID) {
   case scmEventINITID:
     if (true == QI()) {
@@ -77,28 +77,7 @@ void CCommFB::executeEvent(TEventID paEIID, CEventChainExecutionThread *const pa
   default:
     break;
   }
-
-  if(resp & e_Terminated) {
-    if(mCommServiceType == e_Server && scmEventINITID != paEIID) { //if e_Terminated happened in INIT event, server shouldn't be silent
-      //servers will not send information on client termination and should silently start to listen again
-      resp = e_Nothing;
-    } else {
-      //subscribers and clients will close the connection and inform the user
-      closeConnection();
-    }
-  }
-
-  if (e_Nothing != resp) {
-    STATUS() = CIEC_WSTRING(scmResponseTexts[resp & 0xF]);
-    QO() = CIEC_BOOL(!(resp & scg_unComNegative));
-
-    if (scg_unINIT & resp) {
-      sendOutputEvent(scmEventINITOID, paECET);
-    }
-    else {
-      sendOutputEvent(scmReceiveNotificationEventID, paECET);
-    }
-  }
+  processEventResponse(resp, paEIID, paECET);
 }
 
 void CCommFB::readInputData(TEventID paEI) {
@@ -273,7 +252,7 @@ void CCommFB::configureDOs(const char* paDOConfigString, SFBInterfaceSpec& paInt
 }
 
 EComResponse CCommFB::receiveData() {
-  EComResponse eResp;
+  EComResponse eResp = e_Nothing;
   EComResponse eRetVal = e_Nothing;
 
   const unsigned int comInterruptQueueCountCopy = mComInterruptQueueCount;
@@ -299,3 +278,58 @@ EComResponse CCommFB::receiveData() {
 char *CCommFB::getDefaultIDString(const char *paID) {
   return buildIDString("fbdk[].ip[", paID, "]");
 }
+
+EComResponse CCommFB::processInterruptQueueEvent() {
+  EComResponse eResp = e_Nothing;
+  EComResponse eRetVal = e_Nothing;
+
+    if(mInterruptQueue[0] == nullptr) {
+      DEVLOG_ERROR("Attempt to process nullptr in CommFB::receiveData");
+      eResp = e_Nothing;
+    } else {
+      eResp = mInterruptQueue[0]->processInterrupt();
+    }
+
+    if (eResp > eRetVal) {
+      eRetVal = eResp;
+    }
+  return eRetVal;
+}
+
+bool CCommFB::dropTopOfInterruptQueue() {
+  if (mComInterruptQueueCount < 1) {
+    return false;
+  }
+
+  const unsigned int comInterruptQueueCountCopy = mComInterruptQueueCount;
+  mComInterruptQueueCount--;
+  for (unsigned int i = 0; i < comInterruptQueueCountCopy; ++i) {
+    mInterruptQueue[i] = mInterruptQueue[i + 1];
+  }
+  return true;
+}
+
+void CCommFB::processEventResponse(EComResponse paResponse, TEventID paEIID, CEventChainExecutionThread *const paECET) {
+  if(paResponse & e_Terminated) {
+    if(mCommServiceType == e_Server && scmEventINITID != paEIID) { //if e_Terminated happened in INIT event, server shouldn't be silent
+      //servers will not send information on client termination and should silently start to listen again
+      paResponse = e_Nothing;
+    } else {
+      //subscribers and clients will close the connection and inform the user
+      closeConnection();
+    }
+  }
+
+  if (e_Nothing != paResponse) {
+    STATUS() = CIEC_WSTRING(scmResponseTexts[paResponse & 0xF]);
+    QO() = CIEC_BOOL(!(paResponse & scg_unComNegative));
+
+    if (scg_unINIT & paResponse) {
+      sendOutputEvent(scmEventINITOID, paECET);
+    }
+    else {
+      sendOutputEvent(scmReceiveNotificationEventID, paECET);
+    }
+  }
+}
+

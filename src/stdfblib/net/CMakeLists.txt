@@ -15,6 +15,7 @@
 #############################################################################
 SET(SOURCE_GROUP ${SOURCE_GROUP}\\net)
 forte_add_sourcefile_hcpp(GEN_CLIENT_fbt GEN_PUBLISH_fbt  GEN_SERVER_fbt  GEN_SUBSCRIBE_fbt)
+forte_add_sourcefile_hcpp(GEN_MULTISERVER_fbt)
 
 forte_add_sourcefile_hcpp(PUBLISH_1_fbt)
 forte_add_sourcefile_hcpp(SUBSCRIBE_1_fbt)

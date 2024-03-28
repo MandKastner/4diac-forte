@@ -55,6 +55,10 @@ namespace forte {
       EComResponse receiveData() override;
       EComResponse sendData() override;
 
+      EComResponse processInterruptQueueEvent();
+      bool dropTopOfInterruptQueue();
+      void processEventResponse(EComResponse response, TEventID paEIID, CEventChainExecutionThread *const paECET);
+
     private:
       static const CStringDictionary::TStringId scmRequesterEventInputNameIds[];
       static const CStringDictionary::TStringId scmRequesterEventOutputNameIds[];
