@@ -26,6 +26,7 @@ public:
     CComLayer* pop();
     CComLayer* getHead();
     size_t getSize();
+    bool isEmpty();
 
 private:
     std::array<CComLayer*, cgCommunicationInterruptQueueSize> mBuffer;

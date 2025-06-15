@@ -11,7 +11,7 @@
  *    - initial API and implementation and/or initial documentation
  *******************************************************************************/
 
-#include "CSPCQueue.h"
+#include "spscQueue.h"
 
 
 bool CSPSCQueue::push(CComLayer* paComlayer) {
@@ -51,4 +51,8 @@ CComLayer* CSPSCQueue::getHead() {
 
 size_t CSPSCQueue::getSize() {
   return mSize.load(std::memory_order_acquire);
+}
+
+bool CSPSCQueue::isEmpty() {
+  return mHead.load(std::memory_order_relaxed) == mTail.load(std::memory_order_acquire);
 }

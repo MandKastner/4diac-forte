@@ -35,20 +35,18 @@ void GEN_MULTISERVER::executeEvent(TEventID paEIID, CEventChainExecutionThread *
         }
         break;
       case scmSendNotificationEventID:
-          //only send can remove events from the queue
           resp = CCommFB::sendData();
-          if (mComInterruptQueueCount > 0) {
-            //drop & process
+          if (!mInterruptQueue.isEmpty()) {
+            //drop event of queue
             dropTopOfInterruptQueue();
-            if (mComInterruptQueueCount > 0) {
+            if (!mInterruptQueue.isEmpty()) {
+              //process event but do not remove
               resp = processInterruptQueueEvent();
             }
           }
         break;
       case cgExternalEventID:
-        //todo introduce interrupt queue process state ... this is not very readable
-        //only receive new data if everything has been processed
-        if (mComInterruptQueueCount > 1) {
+        if (mInterruptQueue.getSize() > 1) {
           //do nothing we have to wait for the current data being processed
           resp = e_Nothing;
           break;

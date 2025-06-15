@@ -33,9 +33,7 @@ const char * const CBaseCommFB::scmResponseTexts[] = { "OK", "INVALID_ID", "TERM
 
 CBaseCommFB::CBaseCommFB(const CStringDictionary::TStringId paInstanceNameId, forte::core::CFBContainer &paContainer, forte::com_infra::EComServiceType paCommServiceType) :
     CGenFunctionBlock<CEventSourceFB>(paContainer, paInstanceNameId), mCommServiceType(paCommServiceType), mTopOfComStack(nullptr) {
-  memset(mInterruptQueue, 0, sizeof(mInterruptQueue)); //TODO change this to  mInterruptQueue{0} in the extended list when fully switching to C++11
   setEventChainExecutor(getResource()->getResourceEventExecution());
-  mComInterruptQueueCount = 0;
 }
 
 CBaseCommFB::~CBaseCommFB() {
@@ -125,12 +123,8 @@ void CBaseCommFB::closeConnection() {
 }
 
 void CBaseCommFB::interruptCommFB(CComLayer *paComLayer) {
-  if (cgCommunicationInterruptQueueSize > mComInterruptQueueCount) {
-    mInterruptQueue[mComInterruptQueueCount] = paComLayer;
-    mComInterruptQueueCount++;
-  }
-  else {
-    //TODO to many interrupts received issue error msg
+  if(!mInterruptQueue.push(paComLayer)) {
+    //todo to many interrupts
   }
 }
 

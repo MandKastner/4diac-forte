@@ -24,6 +24,7 @@
 #include "../genfb.h"
 #include "../esfb.h"
 #include "forte_sync.h"
+#include "spscQueue.h"
 
 namespace forte {
   namespace com_infra {
@@ -150,8 +151,7 @@ namespace forte {
 
       EComServiceType mCommServiceType;
       CComLayer *mTopOfComStack;
-      unsigned int mComInterruptQueueCount; //!< number of triggers pending from the network
-      CComLayer *mInterruptQueue[cgCommunicationInterruptQueueSize];
+      CSPSCQueue mInterruptQueue;
 
     private:
       CSyncObject mFBLock;

@@ -254,24 +254,20 @@ void CCommFB::configureDOs(const char* paDOConfigString, SFBInterfaceSpec& paInt
 EComResponse CCommFB::receiveData() {
   EComResponse eResp = e_Nothing;
   EComResponse eRetVal = e_Nothing;
+  const size_t queueSize = mInterruptQueue.getSize(); //capture queue size once -> do not process new interrupts
 
-  const unsigned int comInterruptQueueCountCopy = mComInterruptQueueCount;
-  for (size_t i = 0; i < comInterruptQueueCountCopy; ++i) {
-    if(mInterruptQueue[i] == nullptr) {
+  for (size_t i = 0; i < queueSize; i++) {
+    auto comLayer = mInterruptQueue.pop();
+    if(comLayer == nullptr) {
       DEVLOG_ERROR("Attempt to process nullptr in CommFB::receiveData");
       eResp = e_Nothing;
     } else {
-      eResp = mInterruptQueue[i]->processInterrupt();
+      eResp = comLayer->processInterrupt();
     }
     if (eResp > eRetVal) {
       eRetVal = eResp;
     }
   }
-  mComInterruptQueueCount -= comInterruptQueueCountCopy;
-  for (unsigned int i = 0; i < mComInterruptQueueCount; ++i) {
-    mInterruptQueue[i] = mInterruptQueue[i + comInterruptQueueCountCopy];
-  }
-
   return eRetVal;
 }
 
@@ -283,11 +279,11 @@ EComResponse CCommFB::processInterruptQueueEvent() {
   EComResponse eResp = e_Nothing;
   EComResponse eRetVal = e_Nothing;
 
-    if(mInterruptQueue[0] == nullptr) {
-      DEVLOG_ERROR("Attempt to process nullptr in CommFB::receiveData");
+  if(mInterruptQueue.getHead() == nullptr) {
+      DEVLOG_ERROR("Attempt to process nullptr in CommFB::processInterruptQueueEvent");
       eResp = e_Nothing;
     } else {
-      eResp = mInterruptQueue[0]->processInterrupt();
+      eResp = mInterruptQueue.getHead()->processInterrupt();
     }
 
     if (eResp > eRetVal) {
@@ -297,16 +293,7 @@ EComResponse CCommFB::processInterruptQueueEvent() {
 }
 
 bool CCommFB::dropTopOfInterruptQueue() {
-  if (mComInterruptQueueCount < 1) {
-    return false;
-  }
-
-  const unsigned int comInterruptQueueCountCopy = mComInterruptQueueCount;
-  mComInterruptQueueCount--;
-  for (unsigned int i = 0; i < comInterruptQueueCountCopy; ++i) {
-    mInterruptQueue[i] = mInterruptQueue[i + 1];
-  }
-  return true;
+  return mInterruptQueue.pop() != nullptr;
 }
 
 void CCommFB::processEventResponse(EComResponse paResponse, TEventID paEIID, CEventChainExecutionThread *const paECET) {
