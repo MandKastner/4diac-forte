@@ -85,7 +85,7 @@ EComResponse CMultiClientComLayer::processInterrupt() {
   if(e_ProcessDataOk == mInterruptResp){  //todo peer sided termination does not work using interrupt response here
     //todo --> look if client is still connected and get rid of interrupt response or return interrupt response e_ProcessDataOk if client is still connected..
       if (mConnectionState == e_Connected || mConnectionState == e_ConnectedAndListening) {
-        if((nullptr != mTopLayer)){
+        if((nullptr != mTopLayer && !mPacketBuffer.empty())){
           CCriticalRegion criticalRegion(mFb->getFBLock());
           std::unique_ptr<char[]> data;
           unsigned int size;
@@ -131,7 +131,6 @@ EComResponse CMultiClientComLayer::openConnection(char *paLayerParameter) {
 }
 
 void CMultiClientComLayer::closeConnection() {
-  //protect this we do not want any connection on the listening ID in the meantime
   CCriticalRegion criticalRegion(mFb->getFBLock());
   for (CIPComSocketHandler::TSocketDescriptor fd : mClientIDs) {
     closeSocket(fd);
